@@ -51,11 +51,15 @@
 /* #define GNOME_GRAPHICS */ /* Gnome interface */
 /* #define MSWIN_GRAPHICS */ /* Windows NT, CE, Graphics */
 
+#define VULTURE_GRAPHICS /* Vulture's Eye isometric graphics interface */
+#undef TTY_GRAPHICS
+
 /*
  * Define the default window system.  This should be one that is compiled
  * into your system (see defines above).  Known window systems are:
  *
  *      tty, X11, mac, amii, BeOS, Qt, Gem, Gnome
+ *	    vulture (Vulture's Eye)
  */
 
 /* MAC also means MAC windows */
@@ -99,6 +103,12 @@
 #define DEFAULT_WINDOW_SYS "Qt"
 #endif
 #endif
+
+#ifdef VULTURE_GRAPHICS
+# ifndef DEFAULT_WINDOW_SYS
+#  define DEFAULT_WINDOW_SYS "vulture"
+# endif
+#endif /* VULTURE_GRAPHICS */
 
 #ifdef GNOME_GRAPHICS
 #define USE_XPM           /* Use XPM format for images (required) */
@@ -263,8 +273,8 @@
 
 #if defined(UNIX) && !defined(ZLIB_COMP) && !defined(COMPRESS)
 /* path and file name extension for compression program */
-#define COMPRESS "/usr/bin/compress" /* Lempel-Ziv compression */
-#define COMPRESS_EXTENSION ".Z"      /* compress's extension */
+/* #define COMPRESS "/usr/bin/compress" */ /* Lempel-Ziv compression */
+/* #define COMPRESS_EXTENSION ".Z" */      /* compress's extension */
 /* An example of one alternative you might want to use: */
 /* #define COMPRESS "/usr/local/bin/gzip" */ /* FSF gzip compression */
 /* #define COMPRESS_EXTENSION ".gz" */       /* normal gzip extension */
@@ -311,7 +321,7 @@
  *      a tar-like file, thus making a neater installation.  See *conf.h
  *      for detailed configuration.
  */
-/* #define DLB */ /* not supported on all platforms */
+#define DLB  /* not supported on all platforms */
 
 /*
  *      Defining REPRODUCIBLE_BUILD causes 'util/makedefs -v' to construct
@@ -351,9 +361,9 @@
  * If you define HACKDIR, then this will be the default playground;
  * otherwise it will be the current directory.
  */
-#ifndef HACKDIR
-#define HACKDIR "/usr/games/lib/nethackdir"
-#endif
+# ifndef HACKDIR
+#  define HACKDIR "./"
+# endif
 
 /*
  * Some system administrators are stupid enough to make Hack suid root

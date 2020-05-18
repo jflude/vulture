@@ -1774,6 +1774,9 @@ static struct win_info window_opts[] = {
 #ifdef BEOS_GRAPHICS /* unmaintained/defunct */
     { "BeOS", "BeOS InterfaceKit" },
 #endif
+#ifdef VULTURE_GRAPHICS
+    { "vulture", "Vulture's Eye isometric graphics" },
+#endif
     { 0, 0 }
 };
 

@@ -168,6 +168,10 @@ typedef uchar nhsym;
 #endif
 #endif
 
+#ifdef VULTURE_GRAPHICS
+# include "vulture_conf.h"
+#endif
+
 /* Displayable name of this port; don't redefine if defined in *conf.h */
 #ifndef PORT_ID
 #ifdef AMIGA
@@ -201,10 +205,16 @@ typedef uchar nhsym;
 #ifdef TOS
 #define PORT_ID "ST"
 #endif
+#ifdef VULTURE_GRAPHICS
+# include "vulture_version.h"
+#endif
 /* Check again in case something more specific has been defined above. */
 #ifndef PORT_ID
 #ifdef UNIX
 #define PORT_ID "Unix"
+# ifdef VULTURE_GRAPHICS
+#  define PORT_SUB_ID  VULTURE_SUB_ID
+# endif
 #endif
 #endif
 #ifdef VMS
@@ -212,6 +222,9 @@ typedef uchar nhsym;
 #endif
 #ifdef WIN32
 #define PORT_ID "Windows"
+# ifdef VULTURE_GRAPHICS
+#  define PORT_SUB_ID  VULTURE_SUB_ID
+# endif
 #endif
 #endif
 
@@ -252,6 +265,11 @@ typedef uchar nhsym;
 #ifndef USE_TILES
 #define USE_TILES
 #endif
+#endif
+#if defined(VULTURE_GRAPHICS)
+# ifndef USE_TILES
+#  define USE_TILES
+# endif
 #endif
 
 #if defined(UNIX) || defined(VMS) || defined(__EMX__) || defined(WIN32)

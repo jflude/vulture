@@ -5,6 +5,10 @@
 
 #include "hack.h"
 
+#ifdef VULTURE_GRAPHICS
+# include "vulture_main.h"
+#endif
+
 STATIC_DCL char *NDECL(nextmbuf);
 STATIC_DCL void FDECL(getpos_help, (BOOLEAN_P, const char *));
 STATIC_DCL int FDECL(CFDECLSPEC cmp_coord_distu, (const void *, const void *));
@@ -700,6 +704,11 @@ const char *goal;
             auto_describe(cx, cy);
         }
 
+#ifdef VULTURE_GRAPHICS
+        /* Hack to allow nh_poskey to detect the calling function (yuck!). */
+        vulture_whatis_active = 1;
+#endif
+
         c = nh_poskey(&tx, &ty, &sidx);
 
         if (hilite_state) {
@@ -982,6 +991,11 @@ const char *goal;
             free((genericptr_t) garr[i]);
     getpos_hilitefunc = (void FDECL((*), (int))) 0;
     getpos_getvalid = (boolean FDECL((*), (int, int))) 0;
+#ifdef VULTURE_GRAPHICS
+    /* Hack to allow nh_poskey to detect the calling function (yuck!). */
+    vulture_whatis_active = 0;
+#endif
+    getpos_hilitefunc = NULL;
     return result;
 }
 

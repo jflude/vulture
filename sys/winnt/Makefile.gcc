@@ -49,6 +49,17 @@
 #
 
 GAMEDIR = ../binary
+# But first, some Vulture setup
+GRAPHICAL = Y
+ifeq  "$(GRAPHICAL)" "Y"
+VULTURE = Y
+ifeq  "$(VULTURE)" "Y"
+MINGW = C:/MinGW
+MXE = C:/mxe
+SDLCFLAGS = -I$(MXE)/include -I$(MINGW)/include -I$(MINGW)/include/SDL -I$(MXE)/include/SDL
+SDLLIBS = -L$(MXE)/lib -L$(MINGW)/lib -lmingw32 -lSDLmain -lpng -lSDL_mixer -lSDL_ttf -lfreetype -lz -lbz2 -lsmpeg -lmodplug -lvorbis -lvorbisfile -lvorbis -logg -lSDL -ltheoradec -mwindows
+endif
+endif
 
 # 1. 32-bit or 64-bit?
 #
@@ -137,6 +148,13 @@ TARGET_CPU=x86
 SKIP_NETHACKW=Y
 
 #==============================================================================
+# Ensure Vulture Game Name
+ifeq  "$(GRAPHICAL)" "Y"
+ifeq  "$(VULTURE)" "Y"
+# Game Name
+GAME    = Vulture-NetHack-3.6.6
+endif
+endif
 
 #  The version of the game this Makefile was designed for
 NETHACK_VERSION="3.6.6"
@@ -188,6 +206,32 @@ RANDOM  = $(OBJ)/random.o
 #RANDOM =
 BCRYPT=-lbcrypt
 
+ifeq  "$(VULTURE)" "Y"
+WINPORT = $(O)vulture_gen.o $(O)vulture_gfl.o $(O)vulture_gra.o $(O)vulture_init.o $(O)vulture_main.o \
+		$(O)vulture_mou.o $(O)vulture_nhplayerselection.o $(O)vulture_opt.o $(O)vulture_pcmusic.o $(O)vulture_sdl.o \
+		$(O)vulture_sound.o $(O)vulture_tile.o $(O)vulture_tileconfig.o $(O)vulture_txt.o $(O)vulture_win.o \
+		$(O)vulture_winclass__anykeydialog.o $(O)vulture_winclass__button.o $(O)vulture_winclass__choicedialog.o \
+		$(O)vulture_winclass__contextmenu.o $(O)vulture_winclass__dirdialog.o $(O)vulture_winclass__endingwin.o \
+		$(O)vulture_winclass__enhancebutton.o $(O)vulture_winclass__hotspot.o $(O)vulture_winclass__inputdialog.o \
+		$(O)vulture_winclass__introwin.o $(O)vulture_winclass__inventory.o $(O)vulture_winclass__levelwin.o \
+		$(O)vulture_winclass__mainwin.o $(O)vulture_winclass__map.o $(O)vulture_winclass__mapdata.o \
+		$(O)vulture_winclass__menuwin.o $(O)vulture_winclass__messagewin.o $(O)vulture_winclass__minimap.o \
+		$(O)vulture_winclass__nhwindow.o $(O)vulture_winclass__objheaderwin.o $(O)vulture_winclass__objitemwin.o \
+		$(O)vulture_winclass__optionwin.o $(O)vulture_winclass__scrollbar.o $(O)vulture_winclass__scrollwin.o \
+		$(O)vulture_winclass__statuswin.o $(O)vulture_winclass__textwin.o $(O)vulture_winclass__toolbar.o \
+		$(O)vulture_winclass__window.o \
+		$(O)vulture_tileconfig.parser.o $(O)vulture_tileconfig.lexer.o \
+		$(O)vulture_vendor__theoraplay.o \
+		$(O)icon.o $(O)tile.o
+
+
+WINPFLAG   = -DTILES $(SDLCFLAGS) -DVULTURE_NETHACK -DVULTURE_NETHACK_3_6_0
+NHRES   = 
+WINPINC = -I$(JTP)
+WINPHDR = 
+WINPLIBS = $(SDLLIBS) -lwinmm -static-libgcc -static-libstdc++
+VULTURETILESRC = ../win/vulture/gamedata/graphics/tilesrc
+else
 WINPFLAG   = -DTILES -DMSWIN_GRAPHICS -DWIN32CON -D_WIN32_IE=0x0400 -D_WIN32_WINNT=0x0601 -DWINVER=0x0601
 ifeq "$(WANT_WIN_QT4)" "Y"
     WINPFLAG += -DQT_GRAPHICS -DPIXMAPDIR='"."'
@@ -199,7 +243,11 @@ endif
 USE_DLB = Y
 
 ifeq  "$(USE_DLB)" "Y"
+ifneq  "$(VULTURE)" "Y"
 DLBFLG = -DDLB
+else
+DLBFLG =
+endif
 else
 DLBFLG =
 endif
@@ -389,7 +437,9 @@ SOUND = $(OBJ)/ntsound.o
 
 VVOBJ = $(O)version.o
 
-ALLOBJ = $(SOBJ) $(DLBOBJ) $(WOBJ) $(OBJS) $(VVOBJ)
+WINPOBJ = $(WINPORT)
+
+ALLOBJ = $(WINPOBJ) $(SOBJ) $(DLBOBJ) $(WOBJ) $(OBJS) $(VVOBJ)
 
 OPTIONS_FILE = $(DAT)\options
 
@@ -429,7 +479,7 @@ CONFIG_H = $(INCL)/config.h $(INCL)/config1.h $(INCL)/tradstdc.h \
 	       $(INCL)/system.h $(INCL)/unixconf.h $(INCL)/os2conf.h \
 	       $(INCL)/micro.h $(INCL)/pcconf.h $(INCL)/tosconf.h \
 	       $(INCL)/amiconf.h $(INCL)/macconf.h $(INCL)/beconf.h \
-	       $(INCL)/ntconf.h
+	       $(INCL)/ntconf.h ../win/vulture/vulture_version.h
 
 HACK_H = $(INCL)/hack.h $(CONFIG_H) $(INCL)/align.h $(INCL)/context.h \
 	       $(INCL)/dungeon.h $(INCL)/monsym.h $(INCL)/mkroom.h \
@@ -773,6 +823,28 @@ endif
 #
 #
 	$(subst /,\,echo install done > $@)
+ifeq  "$(VULTURE)" "Y"
+	$(subst /,\,if not exist $(GAMEDIR)/config/*.*   mkdir $(GAMEDIR)/config)
+	$(subst /,\,if not exist $(GAMEDIR)/graphics/*.* mkdir $(GAMEDIR)/graphics)
+	$(subst /,\,if not exist $(GAMEDIR)/tiles/*.*   mkdir $(GAMEDIR)/tiles)
+	$(subst /,\,if not exist $(GAMEDIR)/manual/*.*   mkdir $(GAMEDIR)/manual)
+	$(subst /,\,if not exist $(GAMEDIR)/manual/img/*.*   mkdir $(GAMEDIR)/manual/img)
+	$(subst /,\,if not exist $(GAMEDIR)/sound/*.*    mkdir $(GAMEDIR)/sound)
+	$(subst /,\,if not exist $(GAMEDIR)/movie/*.*    mkdir $(GAMEDIR)/movie)
+	$(subst /,\,if not exist $(GAMEDIR)/music/*.*    mkdir $(GAMEDIR)/music)
+	$(subst /,\,if not exist $(GAMEDIR)/fonts/*.*    mkdir $(GAMEDIR)/fonts)
+	$(subst /,\,copy $(JTP)/gamedata/*.*           $(GAMEDIR))
+	$(subst /,\,copy $(JTP)/gamedata/config/*.*    $(GAMEDIR)/config)
+	$(subst /,\,copy $(JTP)/gamedata/graphics/*.*  $(GAMEDIR)/graphics)
+	$(subst /,\,copy $(JTP)/gamedata/tiles/*.*    $(GAMEDIR)/tiles)
+	$(subst /,\,copy $(JTP)/gamedata/manual/*.*    $(GAMEDIR)/manual)
+	$(subst /,\,copy $(JTP)/gamedata/manual/img/*.*    $(GAMEDIR)/manual/img)
+	$(subst /,\,copy $(JTP)/gamedata/sound/*.*     $(GAMEDIR)/sound)
+	$(subst /,\,copy $(JTP)/gamedata/movie/*.*     $(GAMEDIR)/movie)
+	$(subst /,\,copy $(JTP)/gamedata/music/*.*     $(GAMEDIR)/music)
+	$(subst /,\,copy $(JTP)/gamedata/fonts/*.*     $(GAMEDIR)/fonts)
+	$(subst /,\,copy $(MXE)/bin/SDL.dll $(GAMEDIR))
+endif
 
 #  copy $(MSWSYS)/winnt.hlp    $(GAMEDIR)
 
@@ -899,9 +971,15 @@ $(GAME)_.ico : $(MSWSYS)/$(GAME).ico
 #==========================================
 
 initialchk: objdir.tag
+ifeq  "$(VULTURE)" "Y"
+	@echo ----
+	@echo NOTE: This build will include Vulture isometric graphic support.
+	@echo ----
+else
 	@echo ----
 	@echo NOTE: This build will include tile support.
 	@echo ----
+endif
 
 objdir.tag:
 	@test -d $(OBJ) || echo creating directory $(OBJ)
@@ -1026,7 +1104,7 @@ $(MSWIN)/splash.bmp: $(U)uudecode.exe $(MSWIN)/splash.uu
 # Level Compiler Stuff
 #==========================================
 
-LEVCFLAGS=$(cflags) -c -DWIN32 -D_WIN32 -I../include $(cdebug) -DDLB
+LEVCFLAGS=$(cflags) -c -DWIN32 -D_WIN32 -I../include $(cdebug) -DDLB -I$(JTP)
 
 $(U)lev_yacc.c: $(U)lev_comp.y
 	mingw32-make -C ../util -f ../win/win32/levstuff-mingw32.mak $(U)lev_yacc.c
@@ -1564,6 +1642,119 @@ $(O)wintty.o: ../win/tty/wintty.c $(HACK_H) $(INCL)/dlb.h \
 #$(O)Window.o: ../win/X11/Window.c $(INCL)/xwindowp.h $(INCL)/xwindow.h \
 #		$(CONFIG_H)
 #	$(cc) $(CFLAGS) -o$@ ../win/X11/Window.c
+
+# Vulture Vendor Dependencies
+
+$(O)vulture_vendor__theoraplay.o: ../win/vulture/vendor/theoraplay/theoraplay.c ../win/vulture/vendor/theoraplay/theoraplay.h
+	$(cc) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vendor/theoraplay/theoraplay.c
+
+
+$(O)vulture_gen.o: ../win/vulture/vulture_gen.cpp ../win/vulture/vulture_gen.h ../win/vulture/vulture_tile.h $(INCL)/win32api.h $(INCL)/pm.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_gen.cpp
+$(O)vulture_gfl.o: ../win/vulture/vulture_gfl.cpp ../win/vulture/vulture_gfl.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_gfl.cpp
+$(O)vulture_gra.o: ../win/vulture/vulture_gra.cpp ../win/vulture/vulture_gra.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_gra.cpp
+$(O)vulture_init.o: ../win/vulture/vulture_init.cpp ../win/vulture/vulture_init.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_init.cpp
+$(O)vulture_main.o: ../win/vulture/vulture_main.cpp ../win/vulture/vulture_main.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_main.cpp
+$(O)vulture_mou.o: ../win/vulture/vulture_mou.cpp ../win/vulture/vulture_mou.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_mou.cpp
+$(O)vulture_nhplayerselection.o: ../win/vulture/vulture_nhplayerselection.cpp ../win/vulture/vulture_nhplayerselection.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_nhplayerselection.cpp
+$(O)vulture_opt.o: ../win/vulture/vulture_opt.cpp ../win/vulture/vulture_opt.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_opt.cpp
+$(O)vulture_pcmusic.o: ../win/vulture/vulture_pcmusic.cpp ../win/vulture/vulture_pcmusic.h ../win/vulture/vulture_tile.h $(INCL)/win32api.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_pcmusic.cpp
+$(O)vulture_sdl.o: ../win/vulture/vulture_sdl.cpp ../win/vulture/vulture_sdl.h ../win/vulture/vulture_tile.h $(INCL)/date.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_sdl.cpp
+$(O)vulture_sound.o: ../win/vulture/vulture_sound.cpp ../win/vulture/vulture_sound.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_sound.cpp
+$(O)vulture_tile.o: ../win/vulture/vulture_tile.cpp ../win/vulture/vulture_tile.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_tile.cpp
+$(O)vulture_tileconfig.o: ../win/vulture/vulture_tileconfig.cpp ../win/vulture/vulture_tileconfig.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_tileconfig.cpp
+$(O)vulture_txt.o: ../win/vulture/vulture_txt.cpp ../win/vulture/vulture_txt.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_txt.cpp
+$(O)vulture_win.o: ../win/vulture/vulture_win.cpp ../win/vulture/vulture_win.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_win.cpp
+
+
+$(O)vulture_winclass__anykeydialog.o: ../win/vulture/winclass/anykeydialog.cpp ../win/vulture/winclass/anykeydialog.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/anykeydialog.cpp
+$(O)vulture_winclass__button.o: ../win/vulture/winclass/button.cpp ../win/vulture/winclass/button.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/button.cpp
+$(O)vulture_winclass__choicedialog.o: ../win/vulture/winclass/choicedialog.cpp ../win/vulture/winclass/choicedialog.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/choicedialog.cpp
+$(O)vulture_winclass__contextmenu.o: ../win/vulture/winclass/contextmenu.cpp ../win/vulture/winclass/contextmenu.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/contextmenu.cpp
+$(O)vulture_winclass__dirdialog.o: ../win/vulture/winclass/dirdialog.cpp ../win/vulture/winclass/dirdialog.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/dirdialog.cpp
+$(O)vulture_winclass__endingwin.o: ../win/vulture/winclass/endingwin.cpp ../win/vulture/winclass/endingwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/endingwin.cpp
+$(O)vulture_winclass__enhancebutton.o: ../win/vulture/winclass/enhancebutton.cpp ../win/vulture/winclass/enhancebutton.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/enhancebutton.cpp
+$(O)vulture_winclass__hotspot.o: ../win/vulture/winclass/hotspot.cpp ../win/vulture/winclass/hotspot.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/hotspot.cpp
+$(O)vulture_winclass__inputdialog.o: ../win/vulture/winclass/inputdialog.cpp ../win/vulture/winclass/inputdialog.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/inputdialog.cpp
+$(O)vulture_winclass__introwin.o: ../win/vulture/winclass/introwin.cpp ../win/vulture/winclass/introwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/introwin.cpp
+$(O)vulture_winclass__inventory.o: ../win/vulture/winclass/inventory.cpp ../win/vulture/winclass/inventory.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/inventory.cpp
+$(O)vulture_winclass__levelwin.o: ../win/vulture/winclass/levelwin.cpp ../win/vulture/winclass/levelwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/levelwin.cpp
+$(O)vulture_winclass__mainwin.o: ../win/vulture/winclass/mainwin.cpp ../win/vulture/winclass/mainwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/mainwin.cpp
+$(O)vulture_winclass__map.o: ../win/vulture/winclass/map.cpp ../win/vulture/winclass/map.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/map.cpp
+$(O)vulture_winclass__mapdata.o: ../win/vulture/winclass/mapdata.cpp ../win/vulture/winclass/mapdata.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/mapdata.cpp
+$(O)vulture_winclass__menuwin.o: ../win/vulture/winclass/menuwin.cpp ../win/vulture/winclass/menuwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/menuwin.cpp
+$(O)vulture_winclass__messagewin.o: ../win/vulture/winclass/messagewin.cpp ../win/vulture/winclass/messagewin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/messagewin.cpp
+$(O)vulture_winclass__minimap.o: ../win/vulture/winclass/minimap.cpp ../win/vulture/winclass/minimap.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/minimap.cpp
+$(O)vulture_winclass__nhwindow.o: ../win/vulture/winclass/nhwindow.cpp ../win/vulture/winclass/nhwindow.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/nhwindow.cpp
+$(O)vulture_winclass__objheaderwin.o: ../win/vulture/winclass/objheaderwin.cpp ../win/vulture/winclass/objheaderwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/objheaderwin.cpp
+$(O)vulture_winclass__objitemwin.o: ../win/vulture/winclass/objitemwin.cpp ../win/vulture/winclass/objitemwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/objitemwin.cpp
+$(O)vulture_winclass__optionwin.o: ../win/vulture/winclass/optionwin.cpp ../win/vulture/winclass/optionwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/optionwin.cpp
+$(O)vulture_winclass__scrollbar.o: ../win/vulture/winclass/scrollbar.cpp ../win/vulture/winclass/scrollbar.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/scrollbar.cpp
+$(O)vulture_winclass__scrollwin.o: ../win/vulture/winclass/scrollwin.cpp ../win/vulture/winclass/scrollwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/scrollwin.cpp
+$(O)vulture_winclass__statuswin.o: ../win/vulture/winclass/statuswin.cpp ../win/vulture/winclass/statuswin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/statuswin.cpp
+$(O)vulture_winclass__textwin.o: ../win/vulture/winclass/textwin.cpp ../win/vulture/winclass/textwin.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/textwin.cpp
+$(O)vulture_winclass__toolbar.o: ../win/vulture/winclass/toolbar.cpp ../win/vulture/winclass/toolbar.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/toolbar.cpp
+$(O)vulture_winclass__window.o: ../win/vulture/winclass/window.cpp ../win/vulture/winclass/window.h ../win/vulture/vulture_tile.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/winclass/window.cpp
+
+
+$(O)vulture_tileconfig.parser.o: ../win/vulture/vulture_tileconfig.parser.c ../win/vulture/vulture_tileconfig.h 
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_tileconfig.parser.c 
+$(O)vulture_tileconfig.lexer.o: ../win/vulture/vulture_tileconfig.lexer.c ../win/vulture/vulture_tileconfig.h  ../win/vulture/vulture_tileconfig.parser.h
+	$(cpp) $(CFLAGS) -o$@ -I$(JTP) -DUSE_SDL_SYSCALLS -c ../win/vulture/vulture_tileconfig.lexer.c 
+
+../win/vulture/vulture_tileconfig.parser.c ../win/vulture/vulture_tileconfig.parser.h: ../win/vulture/vulture_tileconfig.parser.y 
+	bison --no-lines -d $< -o ../win/vulture/vulture_tileconfig.parser.c
+../win/vulture/vulture_tileconfig.lexer.c: ../win/vulture/vulture_tileconfig.lexer.l 
+	flex -o../win/vulture/vulture_tileconfig.lexer.c ../win/vulture/vulture_tileconfig.lexer.l
+
+
+$(O)icon.o: ../win/vulture/gamedata/nh_icon.ico ../win/vulture/$(GAME).rc
+	windres ../win/vulture/$(GAME).rc $@
+$(O)Window.o: ../win/X11/Window.c $(INCL)/xwindowp.h $(INCL)/xwindow.h \
+		$(CONFIG_H)
+	$(cc) $(CFLAGS) -o$@ ../win/X11/Window.c
 $(O)dialogs.o: ../win/X11/dialogs.c $(CONFIG_H)
 	$(cc) $(CFLAGS) -o$@ ../win/X11/dialogs.c
 $(O)winX.o: ../win/X11/winX.c $(HACK_H) $(INCL)/winX.h $(INCL)/dlb.h \

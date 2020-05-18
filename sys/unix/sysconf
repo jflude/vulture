@@ -134,4 +134,6 @@ PANICTRACE_LIBC=2
 # environment or via ~/.nethackrc run-time configuration file.
 #OPTIONS=!autopickup,fruit:tomato,symset:DECgraphics
 
+OPTIONS=number_pad:1
+
 #eof

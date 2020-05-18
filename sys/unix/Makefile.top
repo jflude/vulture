@@ -20,7 +20,8 @@ NHSROOT=.
 
 # make NetHack
 #PREFIX	 = /usr
-GAME     = nethack
+GAME     = vulture-nethack-3.6.6
+GAMEDIR  = $(PREFIX)/games/lib/$(GAME)dir
 # GAME     = nethack.prg
 #GAMEUID  = games
 #GAMEGRP  = bin
@@ -74,6 +75,28 @@ VARDAT = $(VARDATD) $(VARDATND)
 #CHOWN = chown
 #CHGRP = chgrp
 
+# -----------------------------------------------
+# Extra configuration for NetHack - Vulture's Eye
+# -----------------------------------------------
+
+# Vulture's Eye directories. These also appear in jtp_win.h as
+# defines JTP_MAIN_DIRECTORY, JTP_DATA_DIRECTORY, 
+# JTP_GRAPHICS_DIRECTORY and JTP_SOUND_DIRECTORY and JTP_MUSIC_DIRECTORY
+# and JTP_MOVIE_DIRECTORY.
+# They are assumed to be subdirectories of the main game directory.
+JTPMAINDIR = $(GAMEDIR)
+JTPDATADIR = $(GAMEDIR)/config
+JTPTILESDIR = $(GAMEDIR)/tiles
+JTPGRAPHICSDIR = $(GAMEDIR)/graphics
+JTPSOUNDDIR = $(GAMEDIR)/sound
+JTPMUSICDIR = $(GAMEDIR)/music
+JTPMOVIEDIR = $(GAMEDIR)/movie
+JTPFONTSDIR = $(GAMEDIR)/fonts
+JTPMAPDIR = $(GAMEDIR)/map
+JTPMAPDIRS = $(JTPMAPDIR)/ascii $(JTPMAPDIR)/vulture
+JTPMANUALDIR = $(GAMEDIR)/manual
+JTPMANUALIMGDIR = $(GAMEDIR)/manual/img
+
 #
 # end of configuration
 #
@@ -90,6 +113,17 @@ QUEST_LEVS = ???-goal.lev ???-fil?.lev ???-loca.lev ???-strt.lev
 DATNODLB = $(VARDATND) license symbols
 DATDLB = $(DATHELP) dungeon tribute $(SPEC_LEVS) $(QUEST_LEVS) $(VARDATD)
 DAT = $(DATNODLB) $(DATDLB)
+
+JTPMAINFILES = defaults.nh
+JTPDATAFILES = vulture_intro.txt vulture.conf vulture_sounds.conf vulture_tiles.conf
+JTPGRAPHICSFILES = *.png
+JTPTILEFILES = *.png
+JTPSOUNDFILES = *.ogg
+JTPFONTFILES = *.ttf
+JTPMUSICFILES = *.ogg *.xm
+JTPMOVIEFILES = *.ogv
+JTPMANUALFILES = *.html *.css
+JTPMANUALIMGFILES = *.jpg *.png
 
 $(GAME):
 	( cd src ; $(MAKE) )
@@ -203,6 +237,8 @@ dofiles:
 		-e '}' 					\
 	  	-e '$$s/.*/nodlb/p' < dat/options` ;	\
 	$(MAKE) dofiles-$${target-nodlb}
+	(cd dat ; cp symbols $(INSTDIR) )
+	$(MAKE) dofiles-jtp
 	cp src/$(GAME) $(INSTDIR)
 	cp util/recover $(INSTDIR)
 	-if test -n '$(SHELLDIR)'; then rm -f $(SHELLDIR)/$(GAME); fi
@@ -221,6 +257,9 @@ dofiles:
 	if test -n '$(SHELLDIR)'; then \
 		$(CHGRP) $(GAMEGRP) $(SHELLDIR)/$(GAME); \
 		chmod $(EXEPERM) $(SHELLDIR)/$(GAME); fi
+	-( cd $(INSTDIR) ; $(CHOWN) $(GAMEUID) symbols ; \
+			$(CHGRP) $(GAMEGRP) symbols ; \
+			chmod $(FILEPERM) symbols )
 
 dofiles-dlb: check-dlb
 	( cd dat ; cp nhdat $(DATNODLB) $(INSTDIR) )
@@ -236,6 +275,58 @@ dofiles-nodlb:
 	-( cd $(INSTDIR) ; $(CHOWN) $(GAMEUID) $(DAT) ; \
 			$(CHGRP) $(GAMEGRP) $(DAT) ; \
 			chmod $(FILEPERM) $(DAT) )
+
+dofiles-jtp:
+# create the Vulture's Eye directories and set up their permissions
+# not all mkdirs have -p; those that don't will create a -p directory
+	-mkdir -p $(JTPMAINDIR) $(JTPDATADIR) $(JTPGRAPHICSDIR) $(JTPSOUNDDIR) $(JTPMUSICDIR) $(JTPMOVIEDIR) $(JTPMAPDIRS) $(JTPFONTSDIR) $(JTPMANUALDIR) $(JTPMANUALIMGDIR) $(JTPTILESDIR)
+	-rmdir ./-p 2>/dev/null || true
+	-$(CHOWN) $(GAMEUID) $(JTPMAINDIR) $(JTPDATADIR) $(JTPGRAPHICSDIR) $(JTPSOUNDDIR) $(JTPMUSICDIR) $(JTPMOVIEDIR) $(JTPMAPDIRS) $(JTPFONTSDIR) $(JTPMANUALDIR) $(JTPMANUALIMGDIR  $(JTPTILESDIR))
+	$(CHGRP) $(GAMEGRP) $(JTPMAINDIR) $(JTPDATADIR) $(JTPGRAPHICSDIR) $(JTPSOUNDDIR) $(JTPMUSICDIR) $(JTPMOVIEDIR) $(JTPMAPDIRS) $(JTPFONTSDIR) $(JTPMANUALDIR) $(JTPMANUALIMGDIR) $(JTPTILESDIR)
+	chmod $(DIRPERM) $(JTPMAINDIR) $(JTPDATADIR) $(JTPGRAPHICSDIR) $(JTPSOUNDDIR) $(JTPMUSICDIR) $(JTPMOVIEDIR) $(JTPMAPDIRS) $(JTPFONTSDIR) $(JTPMANUALDIR) $(JTPMANUALIMGDIR) $(JTPTILESDIR)
+# copy over the Vulture's Eye files
+	( cd  win/vulture/gamedata; cp $(JTPMAINFILES) $(JTPMAINDIR) ; \
+	cd config; cp $(JTPDATAFILES) $(JTPDATADIR) ; \
+	cd ../tiles; cp $(JTPTILEFILES) $(JTPTILESDIR) ; \
+	cd ../graphics; cp $(JTPGRAPHICSFILES) $(JTPGRAPHICSDIR) ; \
+	cd ../manual; cp $(JTPMANUALFILES) $(JTPMANUALDIR) ; \
+		cd img; cp $(JTPMANUALIMGFILES) $(JTPMANUALIMGDIR) ; cd .. ; \
+	cd ../fonts; cp $(JTPFONTFILES) $(JTPFONTSDIR) )
+	-(rm -f $(JTPMAINDIR)/se_*)
+	-(rm -f $(JTPGRAPHICSDIR)/se_*)
+	-( cd win/vulture/gamedata/sound; cp $(JTPSOUNDFILES) $(JTPSOUNDDIR) )
+	-( cd win/vulture/gamedata/music; cp $(JTPMUSICFILES) $(JTPMUSICDIR) )
+	-( cd win/vulture/gamedata/movie; cp $(JTPMOVIEFILES) $(JTPMOVIEDIR) )
+	-( cd win/vulture/gamedata/map;   cp ascii/nethack_3_6_0.png $(JTPMAPDIR)/ascii )
+	-( cd win/vulture/gamedata/map;   cp vulture/nethack_3_6_0.png $(JTPMAPDIR)/vulture )
+# set up their permissions
+	-( cd $(JTPMAINDIR) ; $(CHOWN) $(GAMEUID) $(JTPMAINFILES) ; \
+	$(CHGRP) $(GAMEGRP) $(JTPMAINFILES) ; \
+	chmod $(FILEPERM) $(JTPMAINFILES) ; \
+	cd $(JTPDATADIR) ; $(CHOWN) $(GAMEUID) $(JTPDATAFILES) ; \
+	$(CHGRP) $(GAMEGRP) $(JTPDATAFILES) ; \
+	chmod $(FILEPERM) $(JTPDATAFILES) ; \
+	cd $(JTPTILESDIR) ; $(CHOWN) $(GAMEUID) $(JTPTILEFILES) ; \
+	$(CHGRP) $(GAMEGRP) $(JTPTILEFILES) ; \
+	chmod $(FILEPERM) $(JTPTILEFILES) ; \
+	cd $(JTPGRAPHICSDIR) ; $(CHOWN) $(GAMEUID) $(JTPGRAPHICSFILES) ; \
+	$(CHGRP) $(GAMEGRP) $(JTPGRAPHICSFILES) ; \
+	chmod $(FILEPERM) $(JTPGRAPHICSFILES) ; \
+	cd $(JTPSOUNDDIR) ; $(CHOWN) $(GAMEUID) $(JTPSOUNDFILES) ; \
+	cd $(JTPMUSICDIR) ; $(CHOWN) $(GAMEUID) $(JTPMUSICFILES) ; \
+	cd $(JTPMOVIEDIR) ; $(CHOWN) $(GAMEUID) $(JTPMOVIEFILES) ; \
+	cd $(JTPMAPIR)    ; $(CHOWN) $(GAMEUID) $(JTPMAPFILES)   ; \
+	cd $(JTPSOUNDDIR) ; $(CHGRP) $(GAMEGRP) $(JTPSOUNDFILES) ; \
+	chmod $(FILEPERM) $(JTPSOUNDFILES) ; \
+	cd $(JTPFONTSDIR) ; $(CHOWN) $(GAMEUID) $(JTPFONTFILES); \
+	$(CHGRP) $(GAMEGRP) $(JTPFONTFILES) ; \
+	chmod $(FILEPERM) $(JTPFONTFILES) ; \
+	cd $(JTPMANUALDIR) ; $(CHOWN) $(GAMEUID) $(JTPMANUALFILES) ; \
+	$(CHGRP) $(GAMEGRP) $(JTPMANUALFILES) ; \
+	chmod $(FILEPERM) $(JTPMANUALFILES) ; \
+	cd $(JTPMANUALIMGDIR) ; $(CHOWN) $(GAMEUID) $(JTPMANUALIMGFILES) ; \
+	$(CHGRP) $(GAMEGRP) $(JTPMANUALIMGFILES) ; \
+	chmod $(FILEPERM) $(JTPMANUALIMGFILES) )
 
 update: $(GAME) recover $(VARDAT) dungeon spec_levs
 #	(don't yank the old version out from under people who're playing it)

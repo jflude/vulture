@@ -64,6 +64,7 @@ unsigned _stklen = STKSIZ;
  * to help MinGW decide which entry point to choose. If both main and
  * WinMain exist, the resulting executable won't work correctly.
  */
+#if defined(VULTURE_NETHACK) || !defined(__MINGW32__)
 int
 #ifndef __MINGW32__ 
 main(argc, argv)
@@ -76,6 +77,14 @@ char *argv[];
     boolean resuming;
 
     sys_early_init();
+#ifdef VULTURE_NETHACK
+    Strcpy(default_window_sys, "vulture");
+#else
+#ifdef WIN32
+    Strcpy(default_window_sys, "tty");
+#endif
+#endif
+
     resuming = pcmain(argc, argv);
     moveloop(resuming);
     nethack_exit(EXIT_SUCCESS);

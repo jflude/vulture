@@ -114,7 +114,11 @@ static struct Bool_Opt {
     { "color", &iflags.wc_color, FALSE, SET_IN_GAME },
 #endif
     { "confirm", &flags.confirm, TRUE, SET_IN_GAME },
+#ifdef VULTURE_NETHACK
+    { "dark_room", &flags.dark_room, FALSE, SET_IN_SYS },
+#else
     { "dark_room", &flags.dark_room, TRUE, SET_IN_GAME },
+#endif
     { "eight_bit_tty", &iflags.wc_eight_bit_input, FALSE, SET_IN_GAME }, /*WC*/
 #if defined(TTY_GRAPHICS) || defined(CURSES_GRAPHICS) || defined(X11_GRAPHICS)
     { "extmenu", &iflags.extmenu, FALSE, SET_IN_GAME },
@@ -226,7 +230,11 @@ static struct Bool_Opt {
     { "timed_delay", (boolean *) 0, FALSE, SET_IN_GAME },
 #endif
     { "tombstone", &flags.tombstone, TRUE, SET_IN_GAME },
+#ifdef VULTURE_NETHACK
+    { "toptenwin", &iflags.toptenwin, TRUE, SET_IN_GAME },
+#else
     { "toptenwin", &iflags.toptenwin, FALSE, SET_IN_GAME },
+#endif
     { "travel", &flags.travelcmd, TRUE, SET_IN_GAME },
 #ifdef DEBUG
     { "travel_debug", &iflags.trav_debug, FALSE, SET_IN_WIZGAME }, /*hack.c*/

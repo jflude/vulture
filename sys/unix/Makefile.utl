@@ -94,8 +94,8 @@ NHSROOT=..
 # flags for debugging:
 # CFLAGS = -g -I../include
 
-#CFLAGS = -O -I../include
-#LFLAGS =
+CFLAGS = -O -I../include -I../win/vulture -DVULTURE_NETHACK
+LFLAGS =
 
 # we specify C preprocessor flags via CFLAGS; files built with default rules
 # might include $(CPPFLAGS) which could get a value from user's environment;

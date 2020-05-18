@@ -16,6 +16,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef VULTURE_GRAPHICS
+# include "SDL.h"
+#endif
+
 #if !defined(_BULL_SOURCE) && !defined(__sgi) && !defined(_M_UNIX)
 #if !defined(SUNOS4) && !(defined(ULTRIX) && defined(__GNUC__))
 #if defined(POSIX_TYPES) || defined(SVR4) || defined(HPUX)
@@ -550,6 +554,9 @@ whoami()
      * somebody else's name.
      */
     if (!*plname) {
+#ifdef VULTURE_GRAPHICS
+        return TRUE;
+#else
         register const char *s;
 
         s = nh_getenv("USER");
@@ -563,6 +570,7 @@ whoami()
             if (index(plname, '-'))
                 return TRUE;
         }
+#endif
     }
     return FALSE;
 }

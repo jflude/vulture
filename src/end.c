@@ -1448,7 +1448,9 @@ int how;
         if (!done_stopprint || flags.tombstone)
             endwin = create_nhwindow(NHW_TEXT);
 
+#ifndef VULTURE_GRAPHICS
         if (how < GENOCIDED && flags.tombstone && endwin != WIN_ERR)
+#endif
             outrip(endwin, how, endtime);
     } else
         done_stopprint = 1; /* just avoid any more output */

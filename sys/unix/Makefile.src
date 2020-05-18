@@ -40,8 +40,8 @@ SHELL=/bin/sh
 # for Atari
 # SHELL=E:/GEMINI2/MUPFEL.TTP
 
-# Usually, the C compiler driver is used for linking:
-#LINK=$(CC)
+# Normally, the C compiler driver is used for linking:
+LINK=$(CC)
 
 # Pick the SYSSRC and SYSOBJ lines corresponding to your desired operating
 # system.
@@ -170,7 +170,17 @@ GNOMEINC=-I/usr/lib/glib/include -I/usr/lib/gnome-libs/include -I../win/gnome
 # flags for debugging:
 # CFLAGS = -g -I../include
 
-#CFLAGS = -O -I../include
+# VULTURECFLAGS will be passed to the sub-makefile for vulture
+OS = $(shell uname -s)
+ifeq ($(OS),FreeBSD)
+	SDL_CONFIG = sdl11-config
+	SDLMAIN = -lSDLmain-1.1
+else
+	SDL_CONFIG = sdl-config
+	SDLMAIN = -lSDLmain
+endif
+VULTURECFLAGS = -Wall -g -I /opt/local/include
+CFLAGS = -g -I../include -I ../win/vulture $(shell $(SDL_CONFIG) --cflags) -DVULTURE_NETHACK -DVULTURE_NETHACK_3_6_0
 #LFLAGS = 
 
 # The Qt and Be window systems are written in C++, while the rest of
@@ -211,6 +221,9 @@ WINCURSESSRC = ../win/curses/cursmain.c ../win/curses/curswins.c \
 	../win/curses/cursmesg.c ../win/curses/cursinvt.c
 WINCURSESOBJ = cursmain.o curswins.o cursmisc.o cursdial.o cursstat.o \
 	cursinit.o cursmesg.o cursinvt.o
+
+# object for a Vulture's Eye port
+WINVULTUREOBJ = ../win/vulture/build_nethack_3_6_0/vulture.o tile.o ../win/vulture/build_nethack_3_6_0/theoraplay.o
 #
 # files for an X11 port
 # (tile.c is a generated source file)
@@ -267,8 +280,8 @@ WINBEOBJ =
 #WINBEOBJ = winbe.o NHWindow.o NHMenuWindow.o NHMapWindow.o tile.o
 #
 #
-#WINSRC = $(WINTTYSRC)
-#WINOBJ = $(WINTTYOBJ)
+WINSRC = 
+WINOBJ = $(WINVULTUREOBJ)
 #
 # Curses - Karl Garrison, Tangles
 #WINSRC = $(WINCURSESSRC)
@@ -289,16 +302,28 @@ WINBEOBJ =
 # WINTTYLIB = -lcurses16
 # WINTTYLIB = -lncurses
 #WINTTYLIB = -ltermlib
+
+ifeq ($(OS),Darwin)
+  WINTTYLIB = -ltermcap
+else
+  WINTTYLIB = -ltermlib
+endif
+
+# SDL libraries for Vulture's Eye
+WINVULTURELIB = `$(SDL_CONFIG) --libs` $(SDLMAIN) -lSDL_mixer  -lSDL_ttf -lpng -lz -logg -lvorbis -ltheoradec -lpthread
+ifeq ($(OS),Darwin)
+	WINVULTURELIB += -lstdc++
+endif
+
 #
 # libraries for X11
 # If USE_XPM is defined in config.h, you will also need -lXpm here.
-#WINX11LIB = -lXaw -lXmu -lXext -lXt -lX11
+WINX11LIB = -lXaw -lXmu -lXext -lXt -lX11
 # WINX11LIB = -lXaw -lXmu -lXt -lX11
 # WINX11LIB = -lXaw -lXmu -lXext -lXt -lXpm -lX11 -lm
 # WINX11LIB = -lXaw -lXmu -lXpm -lXext -lXt -lX11 -lSM -lICE -lm # BSD/OS 2.0
 #
-#
-# libraries for Qt 3
+# libraries for Qt
 WINQTLIB = -L$(QTDIR)/lib -lqt
 #
 # libraries for Qt 4
@@ -332,6 +357,9 @@ WINCURSESLIB = -lncurses
 # For Curses
 #WINLIB = $(WINCURSESLIB)
 #
+
+WINLIB = $(WINVULTURELIB)
+
 # any other strange libraries your system needs (for Sysunix only -- the more
 # specialized targets should already be right)
 #
@@ -363,7 +391,7 @@ WINCURSESLIB = -lncurses
 LIBS =
 
 # make NetHack
-GAME     = nethack
+GAME     = vulture-nethack-3.6.6
 # GAME     = nethack.prg
 
 # if you defined RANDOM in unixconf.h/tosconf.h since your system did not come
@@ -496,7 +524,8 @@ HACKINCL = align.h amiconf.h artifact.h artilist.h attrib.h beconf.h botl.h \
 	os2conf.h patchlevel.h pcconf.h permonst.h prop.h rect.h region.h \
 	rm.h sp_lev.h spell.h sys.h system.h tcap.h timeout.h tosconf.h \
 	tradstdc.h trampoli.h trap.h unixconf.h vision.h vmsconf.h wintty.h \
-	wincurs.h winX.h winprocs.h wintype.h you.h youprop.h
+	wincurs.h winX.h winprocs.h wintype.h you.h youprop.h \
+        vulture_version.h
 
 HSOURCES = $(HACKINCL) date.h onames.h pm.h vis_tab.h \
 		lev_comp.h dgn_comp.h dgn_file.h
@@ -594,8 +623,14 @@ monst.o:
 objects.o:
 	$(CC) $(CFLAGS) -c objects.c
 	@rm -f $(MAKEDEFS)
+	
+../win/vulture/build_nethack_3_6_0/vulture.o: objects.o monst.o ../include/date.h ../win/vulture/*
+	@$(MAKE) -C ../win/vulture/ VARIANT_NAME=nethack VARIANT_VERSION=3.6.0 BASECFLAGS="$(VULTURECFLAGS)"
 
-# Qt 3 windowport meta-object-compiler output
+../win/vulture/build_nethack_3_6_0/theoraplay.o: ../win/vulture/vendor/theoraplay/theoraplay.c
+	@$(CC) -c ../win/vulture/vendor/theoraplay/theoraplay.c -o ../win/vulture/build_nethack_3_6_0/theoraplay.o
+
+# Qt windowport meta-object-compiler output
 qt_kde0.moc: ../include/qt_kde0.h
 	$(QTDIR)/bin/moc -o qt_kde0.moc ../include/qt_kde0.h
 
@@ -690,6 +725,7 @@ tags: $(CSOURCES)
 
 clean:
 	-rm -f *.o $(HACK_H) $(CONFIG_H)
+	$(MAKE) -C ../win/vulture clean
 
 spotless: clean
 	-rm -f a.out core $(GAME) Sys*

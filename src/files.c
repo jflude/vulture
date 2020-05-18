@@ -41,6 +41,25 @@ const
 #endif
 #endif
 
+#define VULTURE_BONE_ENUMERATE "1"
+#define VULTURE_SAVE_ENUMERATE "1"
+#ifdef __amd64
+  #define VULTURE_SAVE_ARCH "amd64"
+#elif __x86_64
+  #define VULTURE_SAVE_ARCH "x86_64"
+#else
+  #define VULTURE_SAVE_ARCH "i386"
+#endif
+#ifdef WIN32
+  #define VULTURE_SAVE_OS "windows"
+#elif __linux__
+  #define VULTURE_SAVE_OS "linux"
+#elif __APPLE__
+  #define VULTURE_SAVE_OS "osx"
+#else
+  #error "Unknown Save Platform!"
+#endif
+
 #if defined(UNIX) && defined(QT_GRAPHICS)
 #include <sys/types.h>
 #include <dirent.h>
@@ -763,6 +782,7 @@ d_level *lev;
        first letter of the role's filecode; bones loading still worked
        because the bonesid used for validation had the same error */
     Sprintf(dptr, "%c%s", dungeons[lev->dnum].boneid,
+/*Sprintf(file, "bones/v%s/%s/%s/bon%c%s", VULTURE_BONE_ENUMERATE, VULTURE_SAVE_OS, VULTURE_SAVE_ARCH, dungeons[lev->dnum].boneid,*/
             In_quest(lev) ? urole.filecode : "0");
     if ((sptr = Is_special(lev)) != 0)
         Sprintf(eos(dptr), ".%c", sptr->boneid);

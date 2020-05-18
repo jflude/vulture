@@ -57,6 +57,9 @@ extern struct chain_procs trace_procs;
 extern void FDECL(trace_procs_init, (int));
 extern void *FDECL(trace_procs_chain, (int, int, void *, void *, void *));
 #endif
+#ifdef VULTURE_GRAPHICS
+# include "vulture_main.h"
+#endif
 
 STATIC_DCL void FDECL(def_raw_print, (const char *s));
 STATIC_DCL void NDECL(def_wait_synch);
@@ -124,6 +127,9 @@ static struct win_choices {
 #endif
 #ifdef GNOME_GRAPHICS
     { &Gnome_procs, 0 CHAINR(0) },
+#endif
+#ifdef VULTURE_GRAPHICS
+    { &vulture_procs, win_vulture_init CHAINR(0) },
 #endif
 #ifdef MSWIN_GRAPHICS
     { &mswin_procs, 0 CHAINR(0) },

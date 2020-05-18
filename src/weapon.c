@@ -55,6 +55,12 @@ STATIC_VAR NEARDATA const char *const barehands_or_martial[] = {
     "bare handed combat", "martial arts"
 };
 
+#ifdef VULTURE_GRAPHICS
+boolean FDECL(can_advance, (int, BOOLEAN_P));
+#else
+STATIC_DCL boolean FDECL(can_advance, (int, BOOLEAN_P));
+#endif
+
 #define P_NAME(type)                                    \
     ((skill_names_indices[type] > 0)                    \
          ? OBJ_NAME(objects[skill_names_indices[type]]) \
@@ -1077,7 +1083,12 @@ int skill;
 }
 
 /* return true if this skill can be advanced */
+/*ARGSUSED*/
+#ifdef VULTURE_GRAPHICS
 boolean
+#else
+STATIC_OVL boolean
+#endif
 can_advance(skill, speedy)
 int skill;
 boolean speedy;

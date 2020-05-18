@@ -1560,7 +1560,15 @@ int x, y, glyph;
         return;
     }
 
+#ifdef VULTURE_GRAPHICS
+    /* for vulture we must add any glyph that is passed to show_glyph to the glyph buffer
+     * otherwise jtp_print_glyph does not "see" that location.
+     * For example when a monster picks up an item the topmost glyph will be the monster,
+     * which does not change. However we need to see that the item is no longer there.*/
+    {
+#else
     if (gbuf[y][x].glyph != glyph || iflags.use_background_glyph) {
+#endif
         gbuf[y][x].glyph = glyph;
         gbuf[y][x].new = 1;
         if (gbuf_start[y] > x)

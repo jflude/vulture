@@ -478,11 +478,13 @@ enum bodypart_types {
 #define FEATURE_NOTICE_VER_PATCH \
     (((unsigned long) (0x000000000000FF00L & flags.suppress_alert)) >> 8)
 
+#ifndef __cplusplus
 #ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 #ifndef min
 #define min(x, y) ((x) < (y) ? (x) : (y))
+#endif
 #endif
 #define plur(x) (((x) == 1) ? "" : "s")
 
