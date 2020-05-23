@@ -5,16 +5,15 @@
 
 #include "window.h"
 
-
 class scrollbar : public window
 {
-public:
-	scrollbar(window *p, int scrolloff);
-	virtual bool draw();
+  public:
+    scrollbar(window *p, int scrolloff);
+    virtual bool draw();
 
-	int scrollpos;
-private:
+    int scrollpos;
+
+  private:
 };
-
 
 #endif

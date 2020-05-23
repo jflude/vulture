@@ -5,21 +5,18 @@
 
 #include "window.h"
 
-
 class menuitem;
-
 
 class optionwin : public window
 {
-public:
-	optionwin(window *p, menuitem* mi, std::string cap,
-	          char accel, char group_accel, int glyph, bool selected, bool is_checkbox);
-	virtual bool draw();
-	
-	int glyph;
-	menuitem *item;
-	bool is_checkbox; // otherwise it's an option
-};
+  public:
+    optionwin(window *p, menuitem *mi, std::string cap, char accel,
+              char group_accel, int glyph, bool selected, bool is_checkbox);
+    virtual bool draw();
 
+    int glyph;
+    menuitem *item;
+    bool is_checkbox; // otherwise it's an option
+};
 
 #endif

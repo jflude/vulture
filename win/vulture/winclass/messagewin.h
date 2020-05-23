@@ -10,29 +10,31 @@
 
 #define V_MESSAGEBUF_SIZE 512
 
-
 class messagewin : public window
 {
-public:
-	messagewin(window *p);
-	~messagewin();
-	virtual bool draw();
-	virtual eventresult handle_mousemotion_event(window* target, void* result, 
-	                                             int mouse_x, int mouse_y, int state);
-	virtual eventresult handle_mousebuttonup_event(window* target, void* result,
-	                                       int mouse_x, int mouse_y, int button, int state);
-	
-	void add_message(std::string msg);
-	void setshown(int first);
-	int getshown(void);
-  std::string get_message(int offset, int *age);
-	void view_all(void);
+  public:
+    messagewin(window *p);
+    ~messagewin();
+    virtual bool draw();
+    virtual eventresult handle_mousemotion_event(window *target, void *result,
+                                                 int mouse_x, int mouse_y,
+                                                 int state);
+    virtual eventresult handle_mousebuttonup_event(window *target,
+                                                   void *result, int mouse_x,
+                                                   int mouse_y, int button,
+                                                   int state);
 
-private:
-	SDL_Surface *bg_img;
-	int message_ages[V_MESSAGEBUF_SIZE];
-  std::string message_buf[V_MESSAGEBUF_SIZE];
-	int message_cur, message_top;
+    void add_message(std::string msg);
+    void setshown(int first);
+    int getshown(void);
+    std::string get_message(int offset, int *age);
+    void view_all(void);
+
+  private:
+    SDL_Surface *bg_img;
+    int message_ages[V_MESSAGEBUF_SIZE];
+    std::string message_buf[V_MESSAGEBUF_SIZE];
+    int message_cur, message_top;
 };
 
 extern messagewin *msgwin;

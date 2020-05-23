@@ -13,16 +13,16 @@ extern "C" {
 #include <vector>
 
 typedef enum {
-	MAP_MON,
-	MAP_OBJ,
-	MAP_TRAP,
-	MAP_BACK,
-	MAP_SPECIAL,
-	MAP_FURNITURE,
-	MAP_DARKNESS,
-	MAP_PET,
-	
-	MAP_GLYPH // the actual glyph
+    MAP_MON,
+    MAP_OBJ,
+    MAP_TRAP,
+    MAP_BACK,
+    MAP_SPECIAL,
+    MAP_FURNITURE,
+    MAP_DARKNESS,
+    MAP_PET,
+
+    MAP_GLYPH // the actual glyph
 } glyph_type;
 
 typedef enum {
@@ -64,50 +64,56 @@ typedef enum {
     V_ACTION_NAMEMON
 } map_action;
 
-
-class mapviewer {
-public:
-	virtual void map_update(glyph_type type, int prev_glyph, int new_glyph, int x, int y) = 0;
-	virtual void map_clear() = 0;
+class mapviewer
+{
+  public:
+    virtual void map_update(glyph_type type, int prev_glyph, int new_glyph,
+                            int x, int y) = 0;
+    virtual void map_clear() = 0;
 };
 
-class mapdata {
-public:
-	mapdata();
-	
-	void clear();
-	void set_glyph(int x, int y, int glyph);
-	int get_glyph(glyph_type type, int x, int y) const;
-  std::string map_square_description(point target, int include_seen);
-	eventresult handle_click(void* result, int button, point mappos);
-	map_action get_map_action(point mappos);
-	map_action get_map_contextmenu(point mappos);
+class mapdata
+{
+  public:
+    mapdata();
 
-	int perform_map_action(int action_id, point mappos);
+    void clear();
+    void set_glyph(int x, int y, int glyph);
+    int get_glyph(glyph_type type, int x, int y) const;
+    std::string map_square_description(point target, int include_seen);
+    eventresult handle_click(void *result, int button, point mappos);
+    map_action get_map_action(point mappos);
+    map_action get_map_contextmenu(point mappos);
 
-	void add_viewer(mapviewer *v);
-	void del_viewer(mapviewer *v);
-	int map_swallow; /* the engulf tile, if any */
-	
-private:
-	void set_map_data(glyph_type type, int x, int y, int newval, bool force);
-	char mappos_to_dirkey(point mappos);
+    int perform_map_action(int action_id, point mappos);
 
-	/* Map window contents, as Vulture's tile IDs */
-	int map_glyph[ROWNO][COLNO];     /* real glyph representation of map */
-	int map_back[ROWNO][COLNO];      /* background (floors, walls, pools, moats, ...) */
-	int map_furniture[ROWNO][COLNO]; /* furniture (stairs, altars, fountains, ...) */
-	int map_trap[ROWNO][COLNO];      /* traps */
-	int map_obj[ROWNO][COLNO];       /* topmost object */
-	int map_specialeff[ROWNO][COLNO];   /* special effects: zap, engulf, explode */
-	int map_mon[ROWNO][COLNO];       /* monster tile ID */
-	int map_darkness[ROWNO][COLNO];
-	int map_pet[ROWNO][COLNO]; /* special attributes, we use them to highlight the pet */
+    void add_viewer(mapviewer *v);
+    void del_viewer(mapviewer *v);
+    int map_swallow; /* the engulf tile, if any */
 
-	int vulture_tilemap_engulf[NUMMONS];
-	int vulture_tilemap_misc[MAXPCHARS];
+  private:
+    void set_map_data(glyph_type type, int x, int y, int newval, bool force);
+    char mappos_to_dirkey(point mappos);
 
-  std::vector<mapviewer*> views;
+    /* Map window contents, as Vulture's tile IDs */
+    int map_glyph[ROWNO][COLNO]; /* real glyph representation of map */
+    int map_back[ROWNO]
+                [COLNO]; /* background (floors, walls, pools, moats, ...) */
+    int map_furniture[ROWNO]
+                     [COLNO]; /* furniture (stairs, altars, fountains, ...) */
+    int map_trap[ROWNO][COLNO]; /* traps */
+    int map_obj[ROWNO][COLNO];  /* topmost object */
+    int map_specialeff[ROWNO]
+                      [COLNO]; /* special effects: zap, engulf, explode */
+    int map_mon[ROWNO][COLNO]; /* monster tile ID */
+    int map_darkness[ROWNO][COLNO];
+    int map_pet[ROWNO][COLNO]; /* special attributes, we use them to highlight
+                                  the pet */
+
+    int vulture_tilemap_engulf[NUMMONS];
+    int vulture_tilemap_misc[MAXPCHARS];
+
+    std::vector<mapviewer *> views;
 };
 
 extern mapdata *map_data;

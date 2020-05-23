@@ -5,13 +5,12 @@
 
 #include "window.h"
 
-
 class hotspot : public window
 {
-public:
-	hotspot(window *parent, int x, int y, int w, int h, int menu_id, std::string name);
-	virtual bool draw();
+  public:
+    hotspot(window *parent, int x, int y, int w, int h, int menu_id,
+            std::string name);
+    virtual bool draw();
 };
-
 
 #endif

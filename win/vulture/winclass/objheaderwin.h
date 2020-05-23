@@ -5,12 +5,11 @@
 
 #include "window.h"
 
-
 class objheaderwin : public window
 {
-public:
-	objheaderwin(window *parent, std::string cap);
-	virtual bool draw();
+  public:
+    objheaderwin(window *parent, std::string cap);
+    virtual bool draw();
 };
 
 #endif
