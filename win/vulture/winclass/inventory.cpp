@@ -26,8 +26,27 @@ extern const char *disrobing;
 #include "objheaderwin.h"
 #include "objitemwin.h"
 
-#define META(c) (0x80 | (c))
-#define CTRL(c) (0x1f & (c))
+/* Macros for meta and ctrl modifiers:
+ *   M and C return the meta/ctrl code for the given character;
+ *     e.g., (C('c') is ctrl-c
+ */
+#ifndef M
+#ifndef NHSTDC
+#define M(c) (0x80 | (c))
+#else
+#define M(c) ((c) -128)
+#endif /* NHSTDC */
+#endif
+
+#ifndef C
+#define C(c) (0x1f & (c))
+#endif
+
+#define unctrl(c) ((c) <= C('z') ? (0x60 | (c)) : (c))
+#define unmeta(c) (0x7f & (c))
+
+#define META(c) (M(c))
+#define CTRL(c) (C(c))
 
 inventory::inventory(window *p, std::list<menuitem> &menuitems, int how,
                      int id)
@@ -246,7 +265,7 @@ inventory::context_menu(objitemwin *target)
 
         case V_INVACTION_NAME:
             vulture_eventstack_add(target->menu_id, -1, -1, V_RESPOND_ANY);
-            vulture_eventstack_add('n', -1, -1, V_RESPOND_ANY);
+            vulture_eventstack_add('i', -1, -1, V_RESPOND_ANY);
             vulture_eventstack_add(META('n'), -1, -1, V_RESPOND_POSKEY);
             return V_EVENT_HANDLED_FINAL;
 
