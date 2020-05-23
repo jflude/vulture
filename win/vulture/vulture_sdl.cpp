@@ -49,6 +49,11 @@ Uint32 vulture_timer_callback(Uint32 interval, void * param);
 int vulture_handle_global_event(SDL_Event * event);
 
 
+bool is_modifier_key(int sym)
+{
+	return sym >= SDLK_NUMLOCK && sym <= SDLK_COMPOSE;
+}
+
 
 void vulture_wait_event(SDL_Event * event, int wait_timeout)
 {
@@ -71,7 +76,7 @@ void vulture_wait_event(SDL_Event * event, int wait_timeout)
 
 		vulture_handle_global_event(event);
 
-		if (event->type == SDL_KEYDOWN ||
+		if ((event->type == SDL_KEYDOWN && !is_modifier_key(event->key.keysym.sym)) ||
 			event->type == SDL_MOUSEBUTTONDOWN ||
 			event->type == SDL_MOUSEBUTTONUP ||
 			/* send timer events only while the mouse is in the window */
@@ -82,7 +87,6 @@ void vulture_wait_event(SDL_Event * event, int wait_timeout)
 
 	SDL_RemoveTimer(sleeptimer);
 }
-
 
 
 int vulture_poll_event(SDL_Event * event)
