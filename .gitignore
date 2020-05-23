@@ -56,3 +56,7 @@ Makefile.gcc-orig
 # Win32-specific ignores end
 .DS_Store
 
+# Cscope files
+cscope.out
+cscope.files
+
