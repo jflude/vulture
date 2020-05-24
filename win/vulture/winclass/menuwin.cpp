@@ -345,6 +345,9 @@ menuwin::layout()
 
         if (select_how == PICK_NONE)
             new textwin(scrollarea, newcaption);
+        else if (newcaption.empty()) {
+            new textwin(scrollarea, "--------------");
+        }
         else
             new optionwin(scrollarea, &(*i), newcaption, i->accelerator,
                           i->group_accelerator, i->glyph, i->preselected,
