@@ -241,18 +241,18 @@ inventory::context_menu(objitemwin *target)
             /* we call a bunch of functions in do_wear.c directly here;
              * we can do so safely because take_off() directly accounts for
              * elapsed turns */
-#ifndef VULTURE_NETHACK_3_6_0
+#ifdef VULTURE_NETHACK_3_6_0
             select_off(target->obj); /* sets takoff_mask */
-            if (takeoff_mask) {
+            if (context.takeoff.mask) {
                 /* default activity for armor and/or accessories,
                  * possibly combined with weapons */
-                disrobing = "disrobing";
+                (void) strncpy(context.takeoff.disrobing, "disrobing", CONTEXTVERBSZ);
 
                 /* specific activity when handling weapons only */
-                if (!(takeoff_mask & ~(W_WEP | W_SWAPWEP | W_QUIVER)))
-                    disrobing = "disarming";
+                if (!(context.takeoff.mask & ~W_WEAPONS))
+                    (void) strncpy(context.takeoff.disrobing, "disarming", CONTEXTVERBSZ);
 
-                (void) take_off();
+                take_off();
             }
             /* having performed an action we need to return to the main game
              * loop so that thing like AC and vision (because of helmets &

@@ -34,9 +34,31 @@ STATIC_PTR int NDECL(Shirt_on);
 STATIC_DCL void NDECL(Amulet_on);
 STATIC_DCL void FDECL(learnring, (struct obj *, BOOLEAN_P));
 STATIC_DCL void FDECL(Ring_off_or_gone, (struct obj *, BOOLEAN_P));
+/* TODO: This is needed to make remove context menu command from
+         Vulture's GUI inventory work with all kinds of item.
+         Maybe generating virtual keyboard events which simulates
+         a take off of items may work. For example, to take off an
+         item adjusted to 'g', we could generate the following
+         keyboard events:
+         'A', 'Enter', 'i', 'g', 'Enter'
+         */
+#ifndef VULTURE_NETHACK_3_6_0
+STATIC_PTR
+#endif
 int FDECL(select_off, (struct obj *));
 STATIC_DCL struct obj *NDECL(do_takeoff);
-STATIC_PTR int NDECL(take_off);
+/* TODO: This is needed to make remove context menu command from
+         Vulture's GUI inventory work with all kinds of item.
+         Maybe generating virtual keyboard events which simulates
+         a take off of items may work. For example, to take off an
+         item adjusted to 'g', we could generate the following
+         keyboard events:
+         'A', 'Enter', 'i', 'g', 'Enter'
+         */
+#ifndef VULTURE_NETHACK_3_6_0
+STATIC_PTR
+#endif
+int NDECL(take_off);
 STATIC_DCL int FDECL(menu_remarm, (int));
 STATIC_DCL void FDECL(count_worn_stuff, (struct obj **, BOOLEAN_P));
 STATIC_PTR int FDECL(armor_or_accessory_off, (struct obj *));
@@ -2505,7 +2527,9 @@ do_takeoff()
 }
 
 /* occupation callback for 'A' */
+#ifndef VULTURE_NETHACK_3_6_0
 STATIC_PTR
+#endif
 int
 take_off(VOID_ARGS)
 {
