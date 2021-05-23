@@ -31,7 +31,6 @@ objitemwin::draw()
     int text_start_x, text_start_y, txt_height;
     int x = abs_x;
     int y = abs_y;
-    int weight = 0;
     Uint32 textcolor;
 
     vulture_set_draw_region(x, y, x + w - 1, y + h - 1);
@@ -79,21 +78,9 @@ objitemwin::draw()
     vulture_put_text_multiline(V_FONT_MENU, caption, vulture_screen, x + h,
                                y + 3, textcolor, CLR32_BLACK, w - h - 6);
 
-    if (obj) {
-        weight = obj->owt;
-    }
-
     /* weight is in line 3 */
     txt_height = vulture_text_height(V_FONT_MENU, caption);
-    text_start_y = y + txt_height * 2 + 4;
-
-    /* draw the object weight */
-    tmpstr[0] = '\0';
-    if (weight)
-        snprintf(tmpstr, 32, "w: %d", weight);
-    text_start_x = x + (w - vulture_text_length(V_FONT_MENU, tmpstr)) / 2;
-    vulture_put_text_shadow(V_FONT_MENU, tmpstr, vulture_screen, text_start_x,
-                            text_start_y, textcolor, CLR32_BLACK);
+    text_start_y = y + txt_height + 4;
 
     if (item->selected) {
         tmpstr[0] = '\0';
