@@ -481,7 +481,7 @@ char *yytext;
 #include "vulture_types.h"
 #include "vulture_tile.h"
 #include "vulture_tileconfig.h"
-#include "vulture_tileconfig.parser.h"
+#include "vulture_tileconfig.parser.hpp"
 
 #define YY_SKIP_YYWRAP
 extern int yywrap();
