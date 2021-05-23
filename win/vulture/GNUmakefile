@@ -99,7 +99,7 @@ $(BUILDDIR)/%.d: %.cpp
 	@mkdir -p $(BUILDDIR)/winclass
 	echo `pwd`
 	$(CXX) $(CFLAGS) $(INCLUDE) -c $< -o $@
-	
+
 
 else # VARIANT_VERSION not defined
 .PHONY:all
